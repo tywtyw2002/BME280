@@ -125,7 +125,7 @@ bool BME280I2C::ReadTrim()
   brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
   buffer[0] = HUM_DIG_ADDR1;
   brzo_i2c_write(buffer, 1, false);
-  bcode = brzo_i2c_start_transaction();
+  bcode = brzo_i2c_end_transaction();
   delay(50);
 
   if (bcode == 0) {
@@ -151,7 +151,7 @@ bool BME280I2C::ReadTrim()
   brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
   buffer[0] = HUM_DIG_ADDR2;
   brzo_i2c_write(buffer, 1, false);
-  bcode = brzo_i2c_start_transaction();
+  bcode = brzo_i2c_end_transaction();
   delay(50);
 
   if (bcode == 0) {
