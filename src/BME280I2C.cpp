@@ -37,10 +37,9 @@ courtesy of Brian McNoldy at http://andrew.rsmas.miami.edu.
 
 //brzo_i2c buffer
 uint8_t buffer[5];
-
+uint8_t I2C_SCL_FREQUENCY;
 
 /* ==== Methods ==== */
-
 bool BME280I2C::Initialize() {
   WriteRegister(CTRL_HUM_ADDR, controlHumidity);
   WriteRegister(CTRL_MEAS_ADDR, controlMeasure);
@@ -95,7 +94,8 @@ bool BME280I2C::ReadTrim()
   //Wire.write(PRESS_DIG_ADDR);
   //Wire.endTransmission();
   brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
-  brzo_i2c_write(PRESS_DIG_ADDR, 1, false);
+  buffer[0] = PRESS_DIG_ADDR;
+  brzo_i2c_write(buffer, 1, false);
   bcode = brzo_i2c_start_transaction();
   delay(50);
 
@@ -123,7 +123,8 @@ bool BME280I2C::ReadTrim()
   /*}*/
 
   brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
-  brzo_i2c_write(HUM_DIG_ADDR1, 1, false);
+  buffer[0] = HUM_DIG_ADDR1;
+  brzo_i2c_write(buffer, 1, false);
   bcode = brzo_i2c_start_transaction();
   delay(50);
 
@@ -148,7 +149,8 @@ bool BME280I2C::ReadTrim()
  *
  */
   brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
-  brzo_i2c_write(HUM_DIG_ADDR2, 1, false);
+  buffer[0] = HUM_DIG_ADDR2;
+  brzo_i2c_write(buffer, 1, false);
   bcode = brzo_i2c_start_transaction();
   delay(50);
 
@@ -186,7 +188,8 @@ bool BME280I2C::ReadData(int32_t data[8]){
   //Wire.write(PRESS_ADDR);
   //Wire.endTransmission();
   brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
-  brzo_i2c_write(PRESS_ADDR, 1, false);
+  buffer[0] = PRESS_ADDR;
+  brzo_i2c_write(buffer, 1, false);
   brzo_i2c_end_transaction();
 
   delay(50);
@@ -234,6 +237,10 @@ bool BME280I2C::begin(int SDA, int SCL) {
   return Initialize();
 }
 #endif
+
+void BME280I2C::setSpeed(uint8_t speed){
+    I2C_SCL_FREQUENCY = speed;
+}
 
 bool BME280I2C::begin(){
   //Wire.begin();

@@ -42,6 +42,7 @@ class BME280I2C: public BME280{
 
   /* ==== Write configuration to BME280, return true if successful. ==== */
   bool Initialize();
+  void setSpeed(uint8_t speed);
 
   /* ==== Write values to BME280 registers. ==== */
   virtual void WriteRegister(uint8_t addr, uint8_t data);

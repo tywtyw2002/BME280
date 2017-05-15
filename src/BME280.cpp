@@ -30,7 +30,7 @@ courtesy of Brian McNoldy at http://andrew.rsmas.miami.edu.
 
 
 /* ==== Includes ==== */
-#include <Wire.h>
+//#include <Wire.h>
 #include "BME280.h"
 /* ====  END Includes ==== */
 
