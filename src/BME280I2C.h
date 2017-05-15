@@ -42,7 +42,6 @@ class BME280I2C: public BME280{
 
   /* ==== Write configuration to BME280, return true if successful. ==== */
   bool Initialize();
-  void setSpeed(uint8_t speed);
 
   /* ==== Write values to BME280 registers. ==== */
   virtual void WriteRegister(uint8_t addr, uint8_t data);
@@ -61,6 +60,7 @@ public:
 
   /* ==== Method used at start up to initialize the class. Starts the I2C interface. ==== */
   virtual bool begin();
+  void setSpeed(uint8_t speed);
 #if defined(ARDUINO_ARCH_ESP8266)
   /* ==== On esp8266 it is possible to define I2C pins ==== */
   bool begin(int SDA, int SCL);

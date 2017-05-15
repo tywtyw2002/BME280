@@ -37,7 +37,7 @@ courtesy of Brian McNoldy at http://andrew.rsmas.miami.edu.
 
 //brzo_i2c buffer
 uint8_t buffer[5];
-uint8_t I2C_SCL_FREQUENCY;
+uint16_t I2C_SCL_FREQUENCY;
 
 /* ==== Methods ==== */
 bool BME280I2C::Initialize() {
@@ -101,7 +101,7 @@ bool BME280I2C::ReadTrim()
 
   if (bcode == 0) {
       brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
-      brzo_i2c_read(dig[ord], 18, false);
+      brzo_i2c_read(&dig[ord], 18, false);
       bcode = brzo_i2c_start_transaction();
       ord += 18;
   }
@@ -130,7 +130,7 @@ bool BME280I2C::ReadTrim()
 
   if (bcode == 0) {
       brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
-      brzo_i2c_read(dig[ord], 1, false);
+      brzo_i2c_read(&dig[ord], 1, false);
       bcode = brzo_i2c_start_transaction();
       ord++;
   }
@@ -156,7 +156,7 @@ bool BME280I2C::ReadTrim()
 
   if (bcode == 0) {
       brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
-      brzo_i2c_read(dig[ord], 7, false);
+      brzo_i2c_read(&dig[ord], 7, false);
       bcode = brzo_i2c_start_transaction();
       ord++;
   }
@@ -238,7 +238,7 @@ bool BME280I2C::begin(int SDA, int SCL) {
 }
 #endif
 
-void BME280I2C::setSpeed(uint8_t speed){
+void BME280I2C::setSpeed(uint16_t speed){
     I2C_SCL_FREQUENCY = speed;
 }
 
