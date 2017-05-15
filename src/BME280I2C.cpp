@@ -158,7 +158,7 @@ bool BME280I2C::ReadTrim()
       brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
       brzo_i2c_read(&dig[ord], 7, false);
       bcode = brzo_i2c_end_transaction();
-      ord++;
+      ord += 7;
   }
 
 
