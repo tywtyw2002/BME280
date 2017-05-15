@@ -30,9 +30,14 @@ courtesy of Brian McNoldy at http://andrew.rsmas.miami.edu.
 
 
 /* ==== Includes ==== */
-#include <Wire.h>
+//#include <Wire.h>
+#include "brzo_i2c.h"
 #include "BME280I2C.h"
 /* ====  END Includes ==== */
+
+//brzo_i2c buffer
+uint8_t buffer[5];
+
 
 /* ==== Methods ==== */
 
@@ -46,55 +51,114 @@ bool BME280I2C::Initialize() {
 
 void BME280I2C::WriteRegister(uint8_t addr, uint8_t data)
 {
-    Wire.beginTransmission(bme_280_addr);
-    Wire.write(addr);
-    Wire.write(data);
-    Wire.endTransmission();
+    //Wire.beginTransmission(bme_280_addr);
+    brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+    buffer[0] = addr;
+    buffer[1] = data;
+    brzo_i2c_write(buffer, 2, false);
+    //Wire.write(addr);
+    //Wire.write(data);
+    //Wire.endTransmission();
+    brzo_i2c_end_transaction();
 }
 
 bool BME280I2C::ReadTrim()
 {
   uint8_t ord(0);
+  uint8_t bcode = 0;
 
   // Temp. Dig
-  Wire.beginTransmission(bme_280_addr);
-  Wire.write(TEMP_DIG_ADDR);
-  Wire.endTransmission();
+  //Wire.beginTransmission(bme_280_addr);
+  brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+  buffer[0] = TEMP_DIG_ADDR;
+  brzo_i2c_write(buffer, 1, false);
+  bcode = brzo_i2c_end_transaction();
+  //Wire.write(TEMP_DIG_ADDR);
+  //Wire.endTransmission();
 
-  Wire.requestFrom(bme_280_addr, (uint8_t)6);
-  while(Wire.available()){
-    dig[ord++] = Wire.read();
+  delay(50);
+
+  //Wire.requestFrom(bme_280_addr, (uint8_t)6);
+  if (bcode == 0) {
+        brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+        brzo_i2c_read(dig, 6, false);
+        bcode = brzo_i2c_end_transaction();
+        ord += 6;
   }
+
+  //while(Wire.available()){
+    //dig[ord++] = Wire.read();
+  //}
 
   // Pressure Dig
-  Wire.beginTransmission(bme_280_addr);
-  Wire.write(PRESS_DIG_ADDR);
-  Wire.endTransmission();
+  //Wire.beginTransmission(bme_280_addr);
+  //Wire.write(PRESS_DIG_ADDR);
+  //Wire.endTransmission();
+  brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+  brzo_i2c_write(PRESS_DIG_ADDR, 1, false);
+  bcode = brzo_i2c_start_transaction();
+  delay(50);
 
-  Wire.requestFrom(bme_280_addr, (uint8_t)18);
-  while(Wire.available()){
-    dig[ord++] = Wire.read();
+  if (bcode == 0) {
+      brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+      brzo_i2c_read(dig[ord], 18, false);
+      bcode = brzo_i2c_start_transaction();
+      ord += 18;
   }
+
+
+//  Wire.requestFrom(bme_280_addr, (uint8_t)18);
+//  while(Wire.available()){
+//    dig[ord++] = Wire.read();
+//  }
 
   // Humidity Dig 1
-  Wire.beginTransmission(bme_280_addr);
-  Wire.write(HUM_DIG_ADDR1);
-  Wire.endTransmission();
+/*  Wire.beginTransmission(bme_280_addr);*/
+  //Wire.write(HUM_DIG_ADDR1);
+  //Wire.endTransmission();
 
-  Wire.requestFrom(bme_280_addr, (uint8_t)1);
-  while(Wire.available()){
-    dig[ord++] = Wire.read();
+  //Wire.requestFrom(bme_280_addr, (uint8_t)1);
+  //while(Wire.available()){
+    //dig[ord++] = Wire.read();
+  /*}*/
+
+  brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+  brzo_i2c_write(HUM_DIG_ADDR1, 1, false);
+  bcode = brzo_i2c_start_transaction();
+  delay(50);
+
+  if (bcode == 0) {
+      brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+      brzo_i2c_read(dig[ord], 1, false);
+      bcode = brzo_i2c_start_transaction();
+      ord++;
   }
+
 
   // Humidity Dig 2
-  Wire.beginTransmission(bme_280_addr);
-  Wire.write(HUM_DIG_ADDR2);
-  Wire.endTransmission();
+/*
+ *  Wire.beginTransmission(bme_280_addr);
+ *  Wire.write(HUM_DIG_ADDR2);
+ *  Wire.endTransmission();
+ *
+ *  Wire.requestFrom(bme_280_addr, (uint8_t)7);
+ *  while(Wire.available()){
+ *    dig[ord++] = Wire.read();
+ *  }
+ *
+ */
+  brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+  brzo_i2c_write(HUM_DIG_ADDR2, 1, false);
+  bcode = brzo_i2c_start_transaction();
+  delay(50);
 
-  Wire.requestFrom(bme_280_addr, (uint8_t)7);
-  while(Wire.available()){
-    dig[ord++] = Wire.read();
+  if (bcode == 0) {
+      brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+      brzo_i2c_read(dig[ord], 7, false);
+      bcode = brzo_i2c_start_transaction();
+      ord++;
   }
+
 
 #ifdef DEBUG_ON
   Serial.print("Dig: ");
@@ -111,19 +175,30 @@ bool BME280I2C::ReadTrim()
 
 bool BME280I2C::ReadData(int32_t data[8]){
   uint8_t ord = 0;
+  uint8_t bcode = 0;
 
   // for forced mode we need to write the mode to BME280 register before reading
   if ( (mode == 0x01) || (mode == 0x10) )
     setMode(mode);
 
   // Registers are in order. So we can start at the pressure register and read 8 bytes.
-  Wire.beginTransmission(bme_280_addr);
-  Wire.write(PRESS_ADDR);
-  Wire.endTransmission();
+  //Wire.beginTransmission(bme_280_addr);
+  //Wire.write(PRESS_ADDR);
+  //Wire.endTransmission();
+  brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+  brzo_i2c_write(PRESS_ADDR, 1, false);
+  brzo_i2c_end_transaction();
 
-  Wire.requestFrom(bme_280_addr, (uint8_t)8);
-  while(Wire.available()){
-      data[ord++] = Wire.read();
+  delay(50);
+
+  //Wire.requestFrom(bme_280_addr, (uint8_t)8);
+  //while(Wire.available()){
+      //data[ord++] = Wire.read();
+  //}
+  if (bcode == 0){
+      brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
+      brzo_i2c_read(data, 8, false);
+      ord += 8;
   }
 
 #ifdef DEBUG_ON
@@ -155,13 +230,13 @@ BME280I2C::BME280I2C(uint8_t tosr, uint8_t hosr, uint8_t posr, uint8_t mode, uin
 #if defined(ARDUINO_ARCH_ESP8266)
 bool BME280I2C::begin(int SDA, int SCL) {
   // allow config of pins
-  Wire.begin(SDA,SCL);
+  //Wire.begin(SDA,SCL);
   return Initialize();
 }
 #endif
 
 bool BME280I2C::begin(){
-  Wire.begin();
+  //Wire.begin();
   return Initialize();
 }
 
