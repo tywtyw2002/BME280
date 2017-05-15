@@ -96,13 +96,13 @@ bool BME280I2C::ReadTrim()
   brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
   buffer[0] = PRESS_DIG_ADDR;
   brzo_i2c_write(buffer, 1, false);
-  bcode = brzo_i2c_start_transaction();
+  bcode = brzo_i2c_end_transaction();
   delay(50);
 
   if (bcode == 0) {
       brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
       brzo_i2c_read(&dig[ord], 18, false);
-      bcode = brzo_i2c_start_transaction();
+      bcode = brzo_i2c_end_transaction();
       ord += 18;
   }
 
@@ -131,7 +131,7 @@ bool BME280I2C::ReadTrim()
   if (bcode == 0) {
       brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
       brzo_i2c_read(&dig[ord], 1, false);
-      bcode = brzo_i2c_start_transaction();
+      bcode = brzo_i2c_end_transaction();
       ord++;
   }
 
@@ -157,7 +157,7 @@ bool BME280I2C::ReadTrim()
   if (bcode == 0) {
       brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
       brzo_i2c_read(&dig[ord], 7, false);
-      bcode = brzo_i2c_start_transaction();
+      bcode = brzo_i2c_end_transaction();
       ord++;
   }
 
@@ -178,6 +178,7 @@ bool BME280I2C::ReadTrim()
 bool BME280I2C::ReadData(int32_t data[8]){
   uint8_t ord = 0;
   uint8_t bcode = 0;
+  uint8_t dig[8];
 
   // for forced mode we need to write the mode to BME280 register before reading
   if ( (mode == 0x01) || (mode == 0x10) )
@@ -200,8 +201,13 @@ bool BME280I2C::ReadData(int32_t data[8]){
   //}
   if (bcode == 0){
       brzo_i2c_start_transaction(bme_280_addr, I2C_SCL_FREQUENCY);
-      brzo_i2c_read(data, 8, false);
+      brzo_i2c_read(dig, 8, false);
+      brzo_i2c_end_transaction();
       ord += 8;
+  }
+
+  for (int i=0; i < 8; ++i) {
+      data[i] = dig[i];
   }
 
 #ifdef DEBUG_ON

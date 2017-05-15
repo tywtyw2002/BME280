@@ -60,7 +60,7 @@ public:
 
   /* ==== Method used at start up to initialize the class. Starts the I2C interface. ==== */
   virtual bool begin();
-  void setSpeed(uint8_t speed);
+  void setSpeed(uint16_t speed);
 #if defined(ARDUINO_ARCH_ESP8266)
   /* ==== On esp8266 it is possible to define I2C pins ==== */
   bool begin(int SDA, int SCL);
